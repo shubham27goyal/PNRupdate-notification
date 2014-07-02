@@ -45,4 +45,4 @@ var PnrSchema = new mongoose.Schema({
 	passangers : [PassengerSchema]
 });
 
-module.exports = mongoose.model('Pnr', PnrSchema);
+module.exports = mongoose.model('PNR', PnrSchema);
