@@ -7,9 +7,6 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 
-var app = express()e, 'views'));
-app.set('view engine', 'ejs');
-
 app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());

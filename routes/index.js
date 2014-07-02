@@ -1,9 +1,23 @@
 var express = require('express');
+var async = require('async');
 var router = express.Router();
+var Pnr = require('../modules/pnr.js');
 
-/* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+	if(req.query.pnr){
+	  	var pnr = new Pnr(req.query.pnr);
+	  	pnr.getCurrentStatus(function(error, status){
+	  		res.send(status);
+	  	});
+	} else {
+		res.send(403);
+	}
 });
+
+// router.post('/register', function(req,res){
+// 	if(req.body.first_name && req.body.last_name && req.body.email && req.body.pnr){
+// 		var pnr = new Pnr(req.query.pnr);
+// 	};
+// });
 
 module.exports = router;
