@@ -1,4 +1,6 @@
-var mongoose = require('mongoose').connect('mongodb://localhost:27017/pnr');
+var emailConfig = JSON.parse(require('fs').readFileSync("./config/db.json")),
+url = [ 'mongodb://', dbConfig.url, '/', dbConfig.dbName ].join('');
+var mongoose = require('mongoose').connect(url);
 var emailRegExp = /.+\@.+\..+/;
 
 var PassengerSchema = new mongoose.Schema({
@@ -26,7 +28,11 @@ var PnrSchema = new mongoose.Schema({
 		required : true,
 		match : emailRegExp
 	},
-	is_active : Boolean,
+	is_active : {
+		type : Boolean,
+		required : true,
+		default : false
+	},
 	pnr : {
 		type : Number,
 		unique : true,

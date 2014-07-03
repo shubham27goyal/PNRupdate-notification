@@ -1,0 +1,4 @@
+{
+	"url" : "localhost:27017",
+	"dbName" : "pnr"
+}
