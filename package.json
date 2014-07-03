@@ -16,5 +16,18 @@
     "nodemailer": "^0.7.0",
     "request": "^2.36.0",
     "static-favicon": "~1.0.0"
-  }
+  },
+  "description": "A small application to monitor your PNR status and send updates",
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shubham27goyal/PNRupdate-notification.git"
+  },
+  "author": "Shubham Goyal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shubham27goyal/PNRupdate-notification/issues"
+  },
+  "homepage": "https://github.com/shubham27goyal/PNRupdate-notification"
 }
