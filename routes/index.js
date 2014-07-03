@@ -21,7 +21,7 @@ router.post('/register', function(req,res){
 	if(req.body.first_name && req.body.last_name && req.body.email && req.body.pnr){
 		var pnr = new Pnr(req.body.pnr);
 		pnr.initialize(req.body, function(err, status){
-			if(!error){
+			if(!err){
 		  		res.json(status);
 		  	} else {
 		  		res.send(500);

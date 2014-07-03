@@ -7,20 +7,21 @@
 
 module.exports = function (pnr){
 
-	this.pnr = parseInt(pnr);
+	var self = this;
+	self.pnr = parseInt(pnr);
 
-	this.getCurrentStatus = function(callback){
-		request('http://pnrwala.com/pnr2.php?pnr=' + this.pnr, function(error, response, body){
+	self.getCurrentStatus = function(callback){
+		request('http://pnrwala.com/pnr2.php?pnr=' + self.pnr, function(error, response, body){
 			if(!error && response.statusCode == 200){
-				callback(null, JSON.parse(body));
+				callback(null, JSON.parse(body.replace(/(<([^>]+)>)/ig,"")));
 			} else {
 				callback(error);
 			}
 		});
 	};
 
-	this.initialize = function(input, callback){
-		this.getCurrentStatus(function(error, status){
+	self.initialize = function(input, callback){
+		self.getCurrentStatus(function(error, status){
 
 			var fOne = function(next){
 				global['instance'] = new PNR({
@@ -30,7 +31,7 @@ module.exports = function (pnr){
 					},
 					'email' : input.email,
 					'is_active' : true,
-					'pnr' : this.pnr,
+					'pnr' : self['pnr'],
 					'train_no' : status['Train Number'],
 					'train_name' : status['Train Name'],
 					'board_date' : status['Boarding Date '],
@@ -39,7 +40,7 @@ module.exports = function (pnr){
 					'reserve_upto' : status['Reserved Upto'],
 					'board_point' : status['Boarding Point'],
 					'class' : status['Class'],
-					'is_chart_prepared': (status['Charting Status'] == ' CHART NOT PREPARED ') ? false : true,
+					'is_chart_prepared': (status['Charting Status'] == ' CHART NOT PREPARED <br/>') ? false : true,
 				});
 				next();
 			};
@@ -49,11 +50,14 @@ module.exports = function (pnr){
 				var passenger = [];
 				while(true){
 					if(!status[i]){
-						instance.passangers = passanger;
+						instance.passengers = passenger;
 						next();
 						break;
 					} else {
-						passenger.push(status[i]);
+						passenger.push({
+							booking_status : status[i]['Booking Status '],
+							current_status : status[i]['* Current Status ']
+						});
 						i = i + 1;
 						continue;
 					}
@@ -65,8 +69,8 @@ module.exports = function (pnr){
 				if(!err){
 					instance.save(function(e){
 						delete global['instance'];
-						this.start;
-						callback(null, status);
+						self.start();
+						callback(e, status);
 					});
 				} else {
 					callback(err);
@@ -75,22 +79,49 @@ module.exports = function (pnr){
 		});
 	}
 
-	this.start = function(){
-		global[this.pnr.toSring()] = setInterval(function(){
-			this.getCurrentStatus(function(error, status){
-				PNR.findOne({'pnr' : pnr}, function(err, doc){
-					if( status[doc.passangers.length - 1] != doc[doc.passangers.length - 1]){
-						mail(doc.email, "PNR status update" , "Test Message", function(err){
-						});
-						doc.passangers.forEach(function(elem, index){
-							doc.passangers[index] = status[index];
-						});
+	self.start = function(){	
+		var main = function(){
+			self.getCurrentStatus(function(error, status){
+				PNR.findOne({'pnr' : self.pnr}, function(err, doc){
+					var counter = doc.passengers.length - 1;
+					if(status[counter]['* Current Status '] == doc.passengers[counter].current_status && doc.is_active){
+
+						var sendMail = function(){
+							mail(doc.email, "PNR status update" , "Test Message", function(err){});
+						};
+
+						var dataUpdate = function(){
+							var i = 0;
+							while(true){
+								if(status[i]){
+									doc.passengers[i].booking_status = status[i]['Booking Status '];
+									doc.passengers[i].current_status = status[i]['* Current Status '];
+										doc.meta.updated_at = new Date();
+										i++;
+										continue;
+									} else {
+										doc.save();
+										break;
+									}
+								}
+						};
+
+						var checkAgain = function(){
+							setTimeout(main, 2 * 1000);
+						}
+
+						sendMail();
+						dataUpdate();
+						checkAgain();
+
+					} else if (status[counter]['* Current Status '] == '   CNF  ') {
+						doc.is_active = false;
+						doc.meta.updated_at = new Date();
 						doc.save();
-						clearInterval(this.pnr.toSring());
-						delete global[this.pnr.toSring()];
-					}
+					};
 				});
 			});
-		}, 15 * 60 * 1000);
+		};
+		main();
 	};
 }

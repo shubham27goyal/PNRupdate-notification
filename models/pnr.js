@@ -2,7 +2,6 @@ var mongoose = require('mongoose').connect('mongodb://localhost:27017/pnr');
 var emailRegExp = /.+\@.+\..+/;
 
 var PassengerSchema = new mongoose.Schema({
-	id : Number,
 	booking_status : String,
 	current_status : String
 });
@@ -31,6 +30,7 @@ var PnrSchema = new mongoose.Schema({
 	pnr : {
 		type : Number,
 		unique : true,
+		required : true,
 		max : 9999999999
 	},
 	train_no : String,
@@ -42,7 +42,7 @@ var PnrSchema = new mongoose.Schema({
 	board_point : String,
 	class : String,
 	is_chart_prepared : Boolean,
-	passangers : [PassengerSchema]
+	passengers : [PassengerSchema]
 });
 
 module.exports = mongoose.model('PNR', PnrSchema);
