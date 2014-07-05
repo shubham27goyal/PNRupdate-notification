@@ -1,4 +1,4 @@
-var emailConfig = JSON.parse(require('fs').readFileSync("./config/db.json")),
+var dbConfig = JSON.parse(require('fs').readFileSync("./config/db.json")),
 url = [ 'mongodb://', dbConfig.url, '/', dbConfig.dbName ].join('');
 var mongoose = require('mongoose').connect(url);
 var emailRegExp = /.+\@.+\..+/;

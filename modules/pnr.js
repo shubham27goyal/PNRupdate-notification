@@ -142,7 +142,9 @@ module.exports = function (pnr)
 
 						if(status[counter]['* Current Status '] == doc.passengers[counter].current_status && doc.is_active)
 						{
-							mail(doc.email, "PNR status update" , "Test Message", function(err)
+							var message = [ "Hello ", doc.name.first, " ", doc.name.last,
+											"\n\n Your PNR ( " , doc.pnr , " ) has been updated to " , doc.passengers[doc.passengers.length -1].current_status ].join("");
+							mail(doc.email, "PNR status update" , message , function(err)
 							{
 								if(!err)
 								{
